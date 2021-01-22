@@ -1,5 +1,5 @@
 <template>
-  <v-card max-width="600" class="mx-auto top-margin">
+  <v-card class="mx-auto top-margin">
     <v-row justify="center">
       <v-stepper
         v-model="currentStep"
@@ -63,6 +63,7 @@ import StepEventContact from './steps/StepEventContact.vue';
 import StepStartEndDeadline from './steps/StepStartEndDeadline.vue';
 import StepParticipationFee from './steps/StepParticipationFee.vue';
 import StepInvitationCode from './steps/StepInvitationCode.vue';
+import StepCrypto from './steps/StepCrypto.vue';
 
 export default {
   components: {
@@ -73,6 +74,7 @@ export default {
     StepStartEndDeadline,
     StepParticipationFee,
     StepInvitationCode,
+    StepCrypto,
   },
   data() {
     return {
@@ -95,6 +97,7 @@ export default {
         StepLocation,
         StepParticipationFee,
         StepAgeGroup,
+        StepCrypto,
         StepEventContact,
       ];
     },
@@ -106,6 +109,7 @@ export default {
         'Ort',
         'Teilnehmer_innen Beitrag',
         'Zielgruppe',
+        'Verschlüsselung',
         'Kontaktdaten',
       ];
     },
@@ -135,6 +139,7 @@ export default {
       const dataStepEventContact = this.$refs.StepEventContact[0].getData();
       const dataStepInvitationCode = this.$refs.StepInvitationCode[0].getData();
       const dataStepParticipationFee = this.$refs.StepParticipationFee[0].getData();
+      const dataStepCrypto = this.$refs.StepCrypto[0].getData();
 
       this.data.event = {
         name: dataNameDescription.name,
@@ -147,6 +152,7 @@ export default {
         registrationDeadline: dataStartEndDeadline.registrationDeadline,
         participationFee: dataStepParticipationFee.participationFee,
         invitationCode: dataStepInvitationCode.invitationCode,
+        publicKey: dataStepCrypto.publicKey,
       };
     },
     async handleCreateEventRequest() {

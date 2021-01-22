@@ -171,6 +171,7 @@ class Event(TimeStampMixin):
     invitation_code = models.CharField(max_length=6, blank=True)
     max_scout_orga_level = models.ForeignKey(ScoutOrgaLevel, on_delete=models.PROTECT, null=True, blank=True)
     is_public = models.BooleanField(default=0)
+    public_key = models.CharField(max_length=1000, blank=True)
 
     # ToDo: add pdf attatchment
     # ToDo: add html description
