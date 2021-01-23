@@ -1,6 +1,9 @@
+import base64
+
 from django.db import models
 from django.contrib.auth.models import User
-from rest_framework.renderers import JSONRenderer
+from Crypto.PublicKey import RSA
+from Crypto.Cipher import PKCS1_OAEP
 
 
 class TimeStampMixin(models.Model):
@@ -265,6 +268,27 @@ class ParticipantPersonal(TimeStampMixin):
     is_group_leader = models.BooleanField(default=0)
     age_group = models.ForeignKey(AgeGroup, on_delete=models.PROTECT, null=True, blank=True)
     eat_habit_type = models.ManyToManyField(EatHabitType, blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            print(self)
+            # pub_key = self.registration.event.public_key
+
+            pub_key = '-----BEGIN RSA PUBLIC KEY-----\nMIIBCgKCAQEAnGyAwxcp8qwRYvnvGQvDnj/HzeIg+gDh3TIbgUmJaAPo+9+pP1FwzqytpstF\ngO1lKG+Ja8k3ryP9L1fN6KMDVTZK22OnezKreRUsRYwuBTaHZF3mnBrcZCfEn++E69IRL4CQ\n159crAfJAG8F87RjqPkTZxtXDmedQAbTjFrApKo9FPyWTCSw+beYuKihvHgVrlto8oeXhgoT\nbSNGLFKW7FvSAy29J6mqVVvH/hvCCXCqIOwf+I3YHs691KOrofS+kWZCxmM9K7SyxgDZprup\nJdQSIp3Iv0JFUIKfmoHBd19V5ZvMv0kj5mNuj7n0jbbbmVmtpawqoeQfk2AufCg9UwIDAQAB\n-----END RSA PUBLIC KEY-----'
+            priv_key = '-----BEGIN RSA PRIVATE KEY-----\nMIIEpQIBAAKCAQEAnGyAwxcp8qwRYvnvGQvDnj/HzeIg+gDh3TIbgUmJaAPo+9+pP1Fwzqyt\npstFgO1lKG+Ja8k3ryP9L1fN6KMDVTZK22OnezKreRUsRYwuBTaHZF3mnBrcZCfEn++E69IR\nL4CQ159crAfJAG8F87RjqPkTZxtXDmedQAbTjFrApKo9FPyWTCSw+beYuKihvHgVrlto8oeX\nhgoTbSNGLFKW7FvSAy29J6mqVVvH/hvCCXCqIOwf+I3YHs691KOrofS+kWZCxmM9K7SyxgDZ\nprupJdQSIp3Iv0JFUIKfmoHBd19V5ZvMv0kj5mNuj7n0jbbbmVmtpawqoeQfk2AufCg9UwID\nAQABAoIBAFs4n4KmII1nsSACV2BIzwSbd17mj4qcNxuy2/1ysBIbraQtU9scGGg+pWpOwrKk\nPsjs+rwD9VhK6ZzRXMBdSFVKOy9kF0iuTPdo1I+eZzwdB6oNZK4GsB4sXutSWDbaI7GLDWzh\nf77HL330QQlVWoUw9BK+C+/Xlwm+sWH5jry3rU0k5033hsrGse6C9nekAVSNJplxka9xL5CS\nv8Wrbx3nN5GgK+o9PtzclYqSYW3l5vVrM/CQm3a71GvC4COMHJreelMZHj/S5n1L6AgTu8KM\naInGDcyFxJnarcmYnUnp8ZNBkS15UFWYki3wdxQqAv82pdVuf36wPMlEM309DaECgYEAybWj\nT0F58EAHA8da6GWyMwmKoWh9MH0M5FJFbLJRpKLz72pbH/irIZSRx+J3u667kEChooSfdGMl\nGJi/7wxWlQJcLmhKGnZxcbMPmUEOXXCd54AFbnShXqNjg1LN9HD9EfTNANoSpAdTLgUGbmSo\nwNlz8zxQRf1yeS0O4GupEnECgYEAxoaNWnKEg6KocE78YyzrUm1PiujTh5amotGShoeL0NVe\ntku9uaseRsZTVOuHHX6wKloGEKzNYx1SL30DvBzcO+DpUTJ2gABjn+t0IFHFds1sskKGZ38g\nIiArKbpyevzxyQiIMbHmrYip3UU+LycZPhn1I/f0nsPcSGSpyJsUZgMCgYEAyZPB7rSKfbQe\nzoHtsY3f9e01I3TelxSBS7OEOcpCmPtYOAzboCnMK7TjsxP5gBBw1Qoh/d331EI4kkoklWqJ\nJETFhoMmeyee23eMwSUoi+y9gNqJkwbvNTqnelfIBt7bqZQxQwar1kyTrcvLz4q8sm0d2RiP\nSEKuobaLxW8R+aECgYEAqOZeqn3VidzAK1S323Si/KytSMRO+wNL4Cgm3jfB1zlA7B1CXA1e\no94llZEQkiJvpIiUsmkiEFooyug0Xj27jWILfp5NPReXqr36PWj0c9/Pw1Vf3fvFDeOKdWT/\n8uzylBOjM4xkcm1b/zni7uD30+LnseNKBi0iY6Do5hgyYZsCgYEAjplzym1oWAi2NMft+7MS\nqEcjsO1kvux3+ZEQ4CWYAknfpqisn1kfUuAxto/pR6aJTxYZXfR0eXa3xBRVYa/3zfeiZ+QH\ns9Ivug9yUKdHo7qqYjNGP3VUoWa+G+p9rzwBtK9ineb5aDKZqqWZhgpGh6DxAC78PcORQBDW\n2KgVnYQ=\n-----END RSA PRIVATE KEY-----'
+
+            keyPub = RSA.importKey(pub_key)
+            keyPriv = RSA.importKey(priv_key)
+            encryptor = PKCS1_OAEP.new(keyPub)
+
+            encrypted = encryptor.encrypt(self.first_name.encode(('utf-8')))
+            self.first_name = base64.b64encode(encrypted)
+
+            decryptor = PKCS1_OAEP.new(keyPriv)
+            decrypted = decryptor.decrypt(encrypted)
+
+            print(decrypted)
+            super(ParticipantPersonal, self).save(*args, **kwargs)
 
 
 class ParticipantRole(TimeStampMixin):
