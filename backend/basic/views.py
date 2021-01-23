@@ -69,8 +69,16 @@ class EventLocationViewSet(viewsets.ModelViewSet):
 
 class ScoutHierarchyViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated]
-    queryset = ScoutHierarchy.objects.all()
+    queryset = ScoutHierarchy.objects.all().exclude(level=6)
     serializer_class = ScoutHierarchySerializer
+
+
+class ScoutHierachyGroupViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ScoutHierarchySerializer
+
+    def get_queryset(self):
+        return ScoutHierarchy.objects.filter(level=6, parent=self.request.user.userextended.scout_organisation)
 
 
 class RegistrationViewSet(viewsets.ModelViewSet):
@@ -102,7 +110,7 @@ class RegistrationViewSet(viewsets.ModelViewSet):
         return super().create(request, *args, **kwargs)
 
 
-class ZipCodeViewSet(viewsets.ModelViewSet):
+class ZipCodeViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated]
     queryset = ZipCode.objects.all()
     serializer_class = ZipCodeSerializer
@@ -128,7 +136,7 @@ class RoleViewSet(viewsets.ModelViewSet):
     serializer_class = RoleSerializer
 
 
-class MethodOfTravelViewSet(viewsets.ModelViewSet):
+class MethodOfTravelViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated]
     queryset = MethodOfTravel.objects.all()
     serializer_class = MethodOfTravelSerializer
@@ -147,20 +155,27 @@ class ScoutOrgaLevelViewSet(viewsets.ModelViewSet):
 
 
 class ParticipantPersonalViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsResponsiblePersonPermission]
     queryset = ParticipantPersonal.objects.all()
     serializer_class = ParticipantPersonalSerializer
 
     def create(self, request, *args, **kwargs):
         # Check whether habit type exists
         if 'eat_habit_type' in request.data:
-            print(request.data['eat_habit_type'])
             habit_types = request.data['eat_habit_type']
             for type in habit_types:
-                print(type)
                 if not EatHabitType.objects.filter(name__exact=type).exists():
                     new_type = EatHabitType.objects.create(name=type)
                     new_type.save()
+
+        # Check whether group name exits
+        if 'scout_group' in request.data:
+            scout_group = request.data['scout_group']
+            if not ScoutHierarchy.objects.filter(name__exact=scout_group, level__id=6).exists():
+                new_group = ScoutHierarchy.objects.create(name=scout_group, level=ScoutOrgaLevel.objects.get(pk=6),
+                                                          parent=request.user.userextended.scout_organisation)
+                new_group.save()
+                print('created new group: ', new_group)
 
         return super().create(request, *args, **kwargs)
 

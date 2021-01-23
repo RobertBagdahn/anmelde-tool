@@ -52,5 +52,5 @@ class IsSocialMediaPermission(permissions.BasePermission):
 class IsResponsiblePersonPermission(permissions.BasePermission):
 
     def has_permission(self, request, view):
-        return Registration.objects.filter(id=view.kwargs.get("registration_pk"),
-                                           responsible_persons=request.user).exists()
+        pk = view.kwargs.get("registration_pk") or request.data['registration']
+        return Registration.objects.filter(id=pk, responsible_persons=request.user).exists()
