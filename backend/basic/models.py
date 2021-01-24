@@ -257,17 +257,19 @@ class ParticipantPersonal(TimeStampMixin):
         primary_key=True,
         serialize=False,
         verbose_name='ID')
-    registration = models.ForeignKey(Registration, on_delete=models.PROTECT, null=True, blank=True)
-    first_name = models.CharField(max_length=100, blank=True)
-    last_name = models.CharField(max_length=100, blank=True)
+    registration = models.ForeignKey(Registration, on_delete=models.PROTECT)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
     street = models.CharField(max_length=100, blank=True)
     zip_code = models.ForeignKey(ZipCode, on_delete=models.PROTECT, null=True, blank=True)
     date_birth = models.DateField(auto_now=False, auto_now_add=False, null=True, blank=True)
-    scout_group = models.ForeignKey(ScoutHierarchy, on_delete=models.PROTECT, null=True, blank=True)
+    scout_group = models.ForeignKey(ScoutHierarchy, on_delete=models.PROTECT)
+    phone_number = models.CharField(max_length=20, blank=True)
     phone_number = models.CharField(max_length=20, blank=True)
     is_group_leader = models.BooleanField(default=0)
-    age_group = models.ForeignKey(AgeGroup, on_delete=models.PROTECT, null=True, blank=True)
+    age_group = models.ForeignKey(AgeGroup, on_delete=models.PROTECT)
     eat_habit_type = models.ManyToManyField(EatHabitType, blank=True)
+    credentials = models.CharField(max_length=2, blank=True)
 
     def save(self, *args, **kwargs):
         if not self.pk:
@@ -281,12 +283,19 @@ class ParticipantPersonal(TimeStampMixin):
             keyPriv = RSA.importKey(priv_key)
             encryptor = PKCS1_OAEP.new(keyPub)
 
-            encrypted = encryptor.encrypt(self.first_name.encode(('utf-8')))
-            self.first_name = base64.b64encode(encrypted)
+            if not self.credentials:
+                first_star = '*' * (len(self.first_name) - 1)
+                last_star = '*' * (len(self.last_name) - 1)
+                self.credentials = f'{self.first_name[0]}{first_star}, {self.last_name[0]}{last_star}'
+
+            self.first_name = base64.b64encode(encryptor.encrypt(self.first_name.encode(('utf-8'))))
+            self.last_name = base64.b64encode(encryptor.encrypt(self.last_name.encode(('utf-8'))))
+            self.street = base64.b64encode(encryptor.encrypt(self.street.encode(('utf-8'))))
+            self.phone_number = base64.b64encode(encryptor.encrypt(self.phone_number.encode(('utf-8'))))
 
             decryptor = PKCS1_OAEP.new(keyPriv)
-            decrypted = decryptor.decrypt(encrypted)
-
+            text = base64.b64decode(self.first_name)
+            decrypted = decryptor.decrypt(text)
             print(decrypted)
             super(ParticipantPersonal, self).save(*args, **kwargs)
 
