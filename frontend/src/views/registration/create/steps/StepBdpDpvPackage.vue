@@ -393,18 +393,28 @@ export default {
       return response.data;
     },
     loadData() {
-      this.isLoading = true;
       Promise.all([this.getPostalAddress()])
         .then((values) => {
           if (values[0] && values[0].length) {
             this.data = values[0][0]; // eslint-disable-line
+            Promise.all([this.getZipCodeById(this.data.zipCode)])
+              .then((values2) => {
+                [this.zipCodeResponse] = values2;
+              })
+              .catch((error) => {
+                console.log(error);
+              });
           }
-          this.isLoading = false;
         })
         .catch((error) => {
           console.log(error);
-          this.isLoading = false;
         });
+    },
+    async getZipCodeById(id) {
+      const path = `${this.API_URL}basic/zip-code/${id}/`;
+      const response = await axios.get(path);
+
+      return response.data;
     },
   },
 };

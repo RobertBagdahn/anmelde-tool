@@ -573,8 +573,24 @@ export default {
       this.feeNotKnowen = this.data.fixFee == null && this.data.perPersonFee == null;
       this.active = true;
       this.isEditWindow = true;
+      this.loadData();
+    },
+    loadData() {
+      Promise.all([
+        this.getZipCodeById(this.data.zipCode),
+      ])
+        .then((values) => {
+          [this.zipCodeResponse] = values;
+        })
+        .catch((error) => {
+          this.errormsg = error.response.data.message;
+        });
+    },
+    async getZipCodeById(id) {
+      const path = `${this.API_URL}basic/zip-code/${id}/`;
+      const response = await axios.get(path);
 
-      // Thea
+      return response.data;
     },
     closeDialog() {
       this.active = false;
