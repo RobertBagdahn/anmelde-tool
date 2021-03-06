@@ -753,9 +753,10 @@ export default {
     loadData() {
       this.isLoading = true;
 
-      Promise.all([this.getGroups(), this.getEatHabitTypeMapping()])
+      // eslint-disable-next-line max-len
+      Promise.all([this.getGroups(), this.getEatHabitTypeMapping(), this.getZipCodeById(this.data.zipCode)])
         .then((values) => {
-          [this.scoutHierarchyGroups, this.eatHabitTypeMapping] = values;
+          [this.scoutHierarchyGroups, this.eatHabitTypeMapping, this.zipCodeMapping] = values;
           this.isLoading = false;
         })
         .catch((error) => {
@@ -771,6 +772,12 @@ export default {
     },
     async getEatHabitTypeMapping() {
       const path = `${this.API_URL}basic/eat-habit-type/`;
+      const response = await axios.get(path);
+
+      return response.data;
+    },
+    async getZipCodeById(id) {
+      const path = `${this.API_URL}basic/zip-code/${id}/`;
       const response = await axios.get(path);
 
       return response.data;
