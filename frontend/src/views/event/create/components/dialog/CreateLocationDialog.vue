@@ -97,9 +97,7 @@
                         </v-icon>
                       </template>
                       <span>
-                        {{
-                          'Wie viele Schlafplätze können dort schlafen?'
-                        }}
+                        {{ 'Wie viele Schlafplätze können dort schlafen?' }}
                       </span>
                     </v-tooltip>
                   </template>
@@ -155,43 +153,45 @@
                 </v-text-field>
               </v-col>
               <v-col cols="12" sm="6">
-              <v-autocomplete
-                v-model="data.zipCode"
-                :items="zipCodeMapping"
-                :item-text="customText"
-                required
-                :error-messages="zipCodeErrors"
-                item-value="id"
-                label="Stadt / Postleitzahl"
-                placeholder="Wähle Stadt oder Postleitzahl."
-                prepend-icon="mdi-city"
-              >
-                <template slot="append">
-                  <v-tooltip bottom>
-                    <template v-slot:activator="{ on, attrs }">
-                      <v-icon color="success" dark v-bind="attrs" v-on="on">
-                        mdi-help-circle-outline
-                      </v-icon>
-                    </template>
-                    <span>
-                      {{
-                        'Trage bitte den Wohnort oder die Postleitzahl ' +
-                        'des Wohnorts ein und wähle die richtige Option aus.'
-                      }}
-                    </span>
-                  </v-tooltip>
-                </template>
-              </v-autocomplete>
+                <v-autocomplete
+                  v-model="data.zipCode"
+                  :items="zipCodeResponse"
+                  :item-text="customText"
+                  required
+                  :error-messages="zipCodeErrors"
+                  item-value="id"
+                  label="Stadt / Postleitzahl"
+                  placeholder="Wähle Stadt oder Postleitzahl."
+                  prepend-icon="mdi-city"
+                  :loading="isZipLoading"
+                  :search-input.sync="search"
+                >
+                  <template slot="append">
+                    <v-tooltip bottom>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-icon color="success" dark v-bind="attrs" v-on="on">
+                          mdi-help-circle-outline
+                        </v-icon>
+                      </template>
+                      <span>
+                        {{
+                          'Trage bitte den Wohnort oder die Postleitzahl ' +
+                          'des Wohnorts ein und wähle die richtige Option aus.'
+                        }}
+                      </span>
+                    </v-tooltip>
+                  </template>
+                </v-autocomplete>
               </v-col>
             </v-row>
             <v-subheader class="my-0"> Kosten </v-subheader>
             <v-divider class="my-0" />
             <v-row>
-              <v-col cols="12" sm="6" md="4">
+              <v-col cols="12" sm="6">
                 <v-text-field
                   v-model="data.perPersonFee"
                   :error-messages="perPersonFeeErrors"
-                  :disabled="feeNotKnowen"
+                  :disabled="feeNotKnowen || noCostState"
                   label="Kosten pro Person pro Nacht."
                   prepend-icon="mdi-currency-eur"
                 >
@@ -209,10 +209,10 @@
                   </template>
                 </v-text-field>
               </v-col>
-              <v-col cols="12" sm="6" md="4">
+              <v-col cols="12" sm="6">
                 <v-text-field
                   v-model="data.fixFee"
-                  :disabled="feeNotKnowen"
+                  :disabled="feeNotKnowen || noCostState"
                   :error-messages="fixFeeErrors"
                   label="Fixkosten"
                   prepend-icon="mdi-currency-eur"
@@ -234,10 +234,16 @@
                   </template>
                 </v-text-field>
               </v-col>
-              <v-col>
+              <v-col cols="12" sm="6">
                 <v-switch
                   v-model="feeNotKnowen"
                   label="Ich kenne die Preise nicht"
+                ></v-switch>
+              </v-col>
+              <v-col cols="12" sm="6">
+                <v-switch
+                  v-model="noCostState"
+                  label="Es fallen keine Kosten an"
                 ></v-switch>
               </v-col>
             </v-row>
@@ -332,7 +338,6 @@ import {
   requiredIf,
 } from 'vuelidate/lib/validators';
 import axios from 'axios';
-import { mapGetters } from 'vuex';
 
 export default {
   props: ['isOpen'],
@@ -342,6 +347,10 @@ export default {
     valid: true,
     feeNotKnowen: false,
     event_location_types: [{ state: 'No data. PLS Set data', abbr: 0 }],
+    noCostState: false,
+    isZipLoading: false,
+    zipCodeResponse: [],
+    search: null,
     data: {
       name: '',
       locationType: '',
@@ -406,10 +415,46 @@ export default {
       },
     },
   },
+  watch: {
+    noCostState(value) {
+      if (value === true) {
+        this.data.perPersonFee = 0;
+        this.data.fixFee = 0;
+        this.feeNotKnowen = false;
+      }
+    },
+    feeNotKnowen(value) {
+      if (value === true) {
+        this.data.perPersonFee = null;
+        this.data.fixFee = null;
+        this.noCostState = false;
+      }
+    },
+    search(searchString) {
+      // still loading
+      if (this.isZipLoading) return;
+
+      if (!searchString) return;
+
+      if (searchString.indexOf(' ') >= 0) return;
+
+      if (searchString && searchString.length <= 1) return;
+
+      this.isZipLoading = true;
+
+      this.getZipCodeMapping(searchString)
+        .then((res) => {
+          this.zipCodeResponse = res;
+        })
+        .catch((err) => {
+          console.log(err);
+        })
+        .finally(() => {
+          this.isZipLoading = false;
+        });
+    },
+  },
   computed: {
-    ...mapGetters([
-      'zipCodeMapping',
-    ]),
     capacityError() {
       const errors = [];
       if (!this.$v.data.capacity.$dirty) return errors;
@@ -511,6 +556,12 @@ export default {
     },
   },
   methods: {
+    async getZipCodeMapping(searchString) {
+      const path = `${this.API_URL}basic/zip-code/?zip_city=${searchString}`;
+      const response = await axios.get(path);
+
+      return response.data;
+    },
     customText: (item) => `${item.zipCode} — ${item.city}`,
     openDialog() {
       this.active = true;

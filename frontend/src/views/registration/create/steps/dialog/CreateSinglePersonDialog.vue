@@ -226,7 +226,7 @@
             <v-col cols="12" sm="6" md="4">
               <v-autocomplete
                 v-model="data.zipCode"
-                :items="zipCodeMapping"
+                :items="zipCodeResponse"
                 :item-text="customText"
                 required
                 :error-messages="zipCodeErrors"
@@ -234,6 +234,8 @@
                 label="Stadt / Postleitzahl"
                 placeholder="Wähle Stadt oder Postleitzahl."
                 prepend-icon="mdi-city"
+                :loading="isZipLoading"
+                :search-input.sync="search"
               >
                 <template slot="append">
                   <v-tooltip bottom>
@@ -463,6 +465,9 @@ export default {
     isEditWindow: false,
     eatHabitText: [],
     isDayGuest: false,
+    isZipLoading: false,
+    zipCodeResponse: [],
+    search: null,
     data: {
       firstName: null,
       lastName: null,
@@ -517,6 +522,31 @@ export default {
     showSuccess: false,
     timeout: 7000,
   }),
+  watch: {
+    search(searchString) {
+      // still loading
+      if (this.isZipLoading) return;
+
+      if (!searchString) return;
+
+      if (searchString.indexOf(' ') >= 0) return;
+
+      if (searchString && searchString.length <= 1) return;
+
+      this.isZipLoading = true;
+
+      this.getZipCodeMapping(searchString)
+        .then((res) => {
+          this.zipCodeResponse = res;
+        })
+        .catch((err) => {
+          console.log(err);
+        })
+        .finally(() => {
+          this.isZipLoading = false;
+        });
+    },
+  },
   validations: {
     data: {
       scoutName: {
@@ -570,7 +600,6 @@ export default {
       'isAuthenticated',
       'getJwtData',
       'hierarchyMapping',
-      'zipCodeMapping',
     ]),
     getParticipantRoleLabel() {
       return this.isDayGuest ? 'Tagesgast: Welcher Tag?' : 'Mosaikersleben und/oder Kaperfahrt';
@@ -703,6 +732,12 @@ export default {
     },
   },
   methods: {
+    async getZipCodeMapping(searchString) {
+      const path = `${this.API_URL}basic/zip-code/?zip_city=${searchString}`;
+      const response = await axios.get(path);
+
+      return response.data;
+    },
     customText: (item) => `${item.zipCode} — ${item.city}`,
     requiredField(value) {
       const errorMsg = 'Dieses Feld muss ausgefüllt werden.';

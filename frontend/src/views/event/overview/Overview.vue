@@ -294,12 +294,6 @@ export default {
 
       return response.data;
     },
-    async getZipCodeMapping() {
-      const path = `${this.API_URL}basic/zip-code/`;
-      const response = await axios.get(path);
-
-      return response.data;
-    },
     onGoToSettingsButtonClicked() {
       this.goToSettings();
     },
@@ -326,7 +320,6 @@ export default {
       this.getHierarchyMapping(),
       this.getAgeGroupMapping(),
       this.getTentTypeMapping(),
-      this.getZipCodeMapping(),
     ])
       .then((values) => {
         [this.items, this.userExtendedItems] = values;
@@ -338,7 +331,6 @@ export default {
         this.$store.commit('setHierarchyMapping', values[6]);
         this.$store.commit('setAgeGroupMapping', values[7]);
         this.$store.commit('setTentTypeMapping', values[8]);
-        this.$store.commit('setZipCodeMapping', values[9]);
 
         if (!this.hasSetExtendedUserInfos) {
           this.goToSettings();

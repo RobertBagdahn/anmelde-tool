@@ -125,13 +125,17 @@
           <v-col cols="12" sm="6">
             <v-autocomplete
               v-model="data.zipCode"
-              :items="zipCodeMapping"
+              :items="zipCodeResponse"
+              :no-data-text="noZipCodeData"
+              no-filter
               :item-text="customText"
               required
               :error-messages="zipCodeErrors"
               item-value="id"
               label="Stadt / Postleitzahl*"
               placeholder="Wähle Stadt oder Postleitzahl"
+              :loading="isZipLoading"
+              :search-input.sync="search"
               prepend-icon="mdi-city"
             >
               <template slot="append">
@@ -170,7 +174,6 @@
 <script>
 import axios from 'axios';
 import { required, minLength, maxLength } from 'vuelidate/lib/validators';
-import { mapGetters } from 'vuex';
 
 import CreateLocationDialog from '@/views/event/create/components/dialog/CreateLocationDialog.vue';
 import PrevNextButtons from '../components/button/PrevNextButtonsSteps.vue';
@@ -186,6 +189,10 @@ export default {
   data: () => ({
     API_URL: process.env.VUE_APP_API,
     valid: true,
+    search: null,
+    isZipLoading: false,
+    zipCodeResponse: [],
+    tooMuchData: false,
     data: {
       firstName: null,
       lastName: null,
@@ -222,9 +229,6 @@ export default {
     },
   },
   computed: {
-    ...mapGetters([
-      'zipCodeMapping',
-    ]),
     firstNameErrors() {
       const errors = [];
       if (!this.$v.data.firstName.$dirty) return errors;
@@ -289,10 +293,43 @@ export default {
         errors.push('Darf nicht mehr als 20 Zeichen haben');
       return errors;
     },
+    noZipCodeData() {
+      if (this.tooMuchData) {
+        return 'Zu viele Treffer. Suche weiter eingrenzen.';
+      }
+      return 'Keine Treffer gefunden.';
+    },
   },
   watch: {
     postalAddress(value) {
       this.data = value;
+    },
+    search(searchString) {
+      // still loading
+      if (this.isZipLoading) return;
+      this.tooMuchData = false;
+      if (!searchString) return;
+
+      if (searchString.indexOf(' ') >= 0) return;
+
+      if (searchString && searchString.length <= 1) return;
+
+      this.isZipLoading = true;
+
+      this.getZipCodeMapping(searchString)
+        .then((res) => {
+          this.zipCodeResponse = res;
+        })
+        .catch((err) => {
+          if (err.response.status === 403) {
+            this.tooMuchData = true;
+            this.zipCodeResponse = [];
+          }
+          console.log(err.response.status);
+        })
+        .finally(() => {
+          this.isZipLoading = false;
+        });
     },
   },
   methods: {
@@ -335,15 +372,25 @@ export default {
       return res.data;
     },
     async postPostalAddress() {
-      const res = await axios
-        .post(`${process.env.VUE_APP_API}basic/postal-address/`, this.data);
+      const res = await axios.post(
+        `${process.env.VUE_APP_API}basic/postal-address/`,
+        this.data,
+      );
       return res.data;
     },
     async putPostalAddress() {
       const id = this.data.id; // eslint-disable-line
-      const res = await axios
-        .put(`${process.env.VUE_APP_API}basic/postal-address/${id}/`, this.data);
+      const res = await axios.put(
+        `${process.env.VUE_APP_API}basic/postal-address/${id}/`,
+        this.data,
+      );
       return res.data;
+    },
+    async getZipCodeMapping(searchString) {
+      const path = `${this.API_URL}basic/zip-code/?zip_city=${searchString}`;
+      const response = await axios.get(path);
+
+      return response.data;
     },
     loadData() {
       this.isLoading = true;
