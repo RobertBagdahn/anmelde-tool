@@ -14,7 +14,7 @@
             anpassen und ergänzen. <br />
             <br />
             Die folgenden Daten sind nur für das Planungsteam und die Administrator_innen
-            sichtbar <br />
+            sichtbar. <br />
           </p>
           <p>
             <br />

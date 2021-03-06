@@ -224,7 +224,7 @@ class Registration(TimeStampMixin):
     scout_organisation = models.ForeignKey(ScoutHierarchy, on_delete=models.PROTECT, null=True, blank=True)
     responsible_persons = models.ManyToManyField(User)
     event = models.ForeignKey(Event, on_delete=models.PROTECT, null=True, blank=True)
-    free_text = models.CharField(max_length=1000, blank=True)
+    free_text = models.TextField(max_length=10000, blank=True, null=True)
     custom_choice = models.IntegerField(default=0)
     is_confirmed = models.BooleanField(default=0)
     is_accepted = models.BooleanField(default=0)

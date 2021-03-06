@@ -12,7 +12,7 @@
                 <v-container>
                   <div class="ma-2">
                     <p class="ma-0">
-                      Hast du keinen Code bekommen? Gucke nochmal in der
+                      Hast du keinen Code bekommen? Schaue nochmal in der
                       Einladung. Falls du nichts findest, melde dich beim
                       Veranstalter, deiner Bundesführung oder bei:
                       <a href="mailto:support@anmelde-tool.de"
@@ -20,10 +20,10 @@
                       >
                     </p>
                     <p class="mt-4">
-                      Bevor deine Anmeldung verbindlich ist, musst Du sie im
+                      Bevor deine Anmeldung verbindlich ist, musst du sie im
                       letzten Schritt ausdrücklich bestätigen. Du kannst deinen
                       Anmeldevorgang zu jedem Zeitpunkt abbrechen und später
-                      fortsetzen. Deine Daten kannst Du bis zum Anmeldeschluss
+                      fortsetzen. Deine Daten kannst du bis zum Anmeldeschluss
                       verändern.
                     </p>
                   </div>

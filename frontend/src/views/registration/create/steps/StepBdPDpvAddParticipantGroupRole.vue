@@ -2,7 +2,7 @@
   <v-form ref="formParticipantGroupRole" v-model="valid">
     <v-container>
       <p>
-        Du kannst die Anzahl der Teilnehmenden bis zum 01.Mai 2021 anpassen.
+        Du kannst die Anzahl der Teilnehmenden bis zum 1. Mai 2021 anpassen.
         <br />
         <br />
         Dafür kannst du dich jederzeit wieder einloggen. <br />
@@ -115,7 +115,7 @@
       {{
         `Du hast ${total} Personen angemeldet. Das entspricht einem Stammesbeitrag von maximal ${
           total * 10
-        } €`
+        } €.`
       }}
     </v-container>
     <v-divider class="my-3" />

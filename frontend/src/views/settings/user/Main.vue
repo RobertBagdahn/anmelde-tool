@@ -6,7 +6,7 @@
           <v-layout column>
             <v-card>
               <v-card-title class="text-center justify-center py-6">
-                Hier kannst Du deinen persönlichen Account anpassen.
+                Hier kannst du deinen persönlichen Account anpassen.
               </v-card-title>
               <v-card-text>
                 <v-container>
@@ -224,7 +224,7 @@ export default {
           'Die E-Mail nutzen wir für die Kommunikation mit dem Tool und für Rückfragen.',
         mobileNumber:
           'Die Handynummer ist freiwillig und hilft dich zu kontaktieren (Für manche Fahrten ist sie Pflicht)',
-        scoutOrganisation: 'Mit dem Stift kannst Du deinen Stamm auswählen.',
+        scoutOrganisation: 'Mit dem Stift kannst du deinen Stamm auswählen.',
       },
       user: null,
       scoutOrganisation: null,

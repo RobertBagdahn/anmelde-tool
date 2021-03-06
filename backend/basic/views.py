@@ -221,7 +221,7 @@ class ScoutOrgaLevelViewSet(viewsets.ModelViewSet):
 
 
 class ParticipantPersonalViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated]  # ToDo: implement IsResponsiblePersonPermission
+    permission_classes = [IsAuthenticated,IsResponsiblePersonPermission]
     queryset = ParticipantPersonal.objects.all()
     serializer_class = ParticipantPersonalSerializer
 
@@ -361,7 +361,7 @@ class EventParticipantsViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class RegistrationParticipantsViewSet(viewsets.ReadOnlyModelViewSet):
-    permission_classes = [IsAuthenticated]  # ToDo: implement IsResponsiblePersonPermission
+    permission_classes = [IsAuthenticated,IsResponsiblePersonPermission]
     serializer_class = RegistrationParticipantsSerializer
 
     def get_queryset(self):
@@ -373,7 +373,7 @@ class RegistrationParticipantsViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class RegistrationSummaryViewSet(viewsets.ReadOnlyModelViewSet):
-    permission_classes = [IsAuthenticated]  # ToDo: implement IsResponsiblePersonPermission
+    permission_classes = [IsAuthenticated,IsResponsiblePersonPermission]
     serializer_class = RegistrationSummarySerializer
 
     def get_queryset(self):
