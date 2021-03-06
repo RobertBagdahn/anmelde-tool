@@ -789,9 +789,13 @@ export default {
       this.isLoading = true;
 
       // eslint-disable-next-line max-len
-      Promise.all([this.getGroups(), this.getEatHabitTypeMapping(), this.getZipCodeById(this.data.zipCode)])
+      Promise.all([
+        this.getGroups(),
+        this.getEatHabitTypeMapping(),
+        this.getZipCodeById(this.data.zipCode),
+      ])
         .then((values) => {
-          [this.scoutHierarchyGroups, this.eatHabitTypeMapping, this.zipCodeMapping] = values;
+          [this.scoutHierarchyGroups, this.eatHabitTypeMapping, this.zipCodeResponse] = values;
           this.isLoading = false;
         })
         .catch((error) => {

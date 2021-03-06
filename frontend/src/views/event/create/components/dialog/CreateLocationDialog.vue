@@ -573,6 +573,8 @@ export default {
       this.feeNotKnowen = this.data.fixFee == null && this.data.perPersonFee == null;
       this.active = true;
       this.isEditWindow = true;
+
+      // Thea
     },
     closeDialog() {
       this.active = false;
