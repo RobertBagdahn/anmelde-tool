@@ -84,6 +84,7 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             os.path.join(BASE_DIR, 'templates/emails/'),
+            os.path.join(BASE_DIR, 'templates/pdfs/'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {

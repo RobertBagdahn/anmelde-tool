@@ -1,0 +1,73 @@
+<style>
+.border_blue {
+    border-color: blue;
+}
+.border_orange {
+    border-color: orange;
+}
+.group_box {
+    border-style: solid;
+    border-width: 5px;
+    text-align: center;
+    margin: 20px;
+}
+</style>
+
+<body>
+    <table>
+        {% for group in groups %}
+        <tr>
+            <td>
+                {% if group.0 != None %}
+                    <div class="group_box
+                        {% if group.0.bund != "BdP" %} border_blue {% endif %}
+                        {% if group.0.bund == "BdP" %} border_orange {% endif %}
+                        " >
+                        <b>{{ group.0.scout_organisation__name }}</b><br>
+                        {{ group.0.participants }} Personen <br>
+
+                        {% if group.0.custom_choice == 1 or group.0.custom_choice == 7 or group.0.custom_choice == 8 or group.0.custom_choice == 9%}
+                            <u>{{ group.0.scout_organisation__zip_code__city }}</u><br>
+                        {% else %}
+                            {{ group.0.scout_organisation__zip_code__city }}<br>
+                        {% endif %}
+
+                        {% if group.0.custom_choice == 1 %} bleiben {% endif %}
+                        {% if group.0.custom_choice == 5 or group.0.custom_choice == 8 or group.0.custom_choice == 11 %} weit weg ist ok {% endif %}
+                        {% if group.0.custom_choice == 4 or group.0.custom_choice == 7 or group.0.custom_choice == 10 %} bitte in der Nähe {% endif %}
+                        {% if group.0.custom_choice == 6 or group.0.custom_choice == 9 or group.0.custom_choice == 12 %} beides is ok {% endif %}
+                    </div>
+                {% endif %}
+            </td>
+            <td>
+                {% if group.1 != None %}
+                    <div class="group_box
+                        {% if group.1.bund != "BdP" %} border_blue {% endif %}
+                        {% if group.1.bund == "BdP" %} border_orange {% endif %}
+                        " >
+                        <b>{{ group.1.scout_organisation__name }}</b><br>
+                        {{ group.1.participants }} Personen <br>
+
+                        {% if group.1.custom_choice == 1 or group.1.custom_choice == 7 or group.1.custom_choice == 8 or group.1.custom_choice == 9%}
+                            <u>{{ group.1.scout_organisation__zip_code__city }}</u><br>
+                        {% else %}
+                            {{ group.1.scout_organisation__zip_code__city }}<br>
+                        {% endif %}
+
+                        
+                        {% if group.1.custom_choice == 1 %} bleiben {% endif %}
+                        {% if group.1.custom_choice == 5 or group.1.custom_choice == 8 or group.1.custom_choice == 11 %} weit weg ist ok {% endif %}
+                        {% if group.1.custom_choice == 4 or group.1.custom_choice == 7 or group.1.custom_choice == 10 %} bitte in der Nähe {% endif %}
+                        {% if group.1.custom_choice == 6 or group.1.custom_choice == 9 or group.1.custom_choice == 12 %} beides is ok {% endif %}
+                    </div>
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td><br></td>
+            <td><br></td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+

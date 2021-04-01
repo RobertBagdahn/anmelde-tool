@@ -117,15 +117,6 @@ class EventParticipantsSerializer(serializers.ModelSerializer):
             'registration_date'
         )
 
-    def get_bund_name(self, scout_organisation):
-        print(scout_organisation)
-        if scout_organisation.level_id > 3:
-            return self.get_bund_name(scout_organisation.parent)
-        elif scout_organisation.level_id < 3:
-            raise Exception("To low value")
-        else:
-            return scout_organisation.name
-
     def get_scout_organisations(self, obj):
         result = obj.registration_set.values('scout_organisation__name').annotate(
             participants=Coalesce(Sum('participantgroup__number_of_persons'), 0)

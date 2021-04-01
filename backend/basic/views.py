@@ -1,16 +1,26 @@
 # views.py
+from io import StringIO
+
 from django.contrib.auth.models import User
-from django.db.models import Q
+from django.db.models import Q, Case, When, Sum, Count
+from django.db.models.expressions import F
+from django.db.models.functions import Coalesce
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from django.template import Context
+from django.template.loader import get_template
 from django_filters import FilterSet, CharFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets, mixins
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 from django.core.exceptions import PermissionDenied
 from helper.user_creation import CreateUserExternally
 from rest_framework.response import Response
+from xhtml2pdf import pisa
+
 from .models import Event, AgeGroup, EventLocation, ScoutHierarchy, Registration, \
     ZipCode, ParticipantGroup, Role, MethodOfTravel, Tent, \
     ScoutOrgaLevel, ParticipantPersonal, EatHabitType, EatHabit, TravelType, \
@@ -28,6 +38,8 @@ from .permissions import IsEventMaster, IsKitchenMaster, IsEventCashMaster, IsPr
     IsLogisticMaster, IsSocialMediaPermission, IsResponsiblePersonPermission
 
 from helper.registration_summary import registration_responsible_person, create_registration_summary
+
+from helper.pdf import generate_groups_pdf
 
 
 def get_dataset(kwargs, pk, dataset):
@@ -186,6 +198,54 @@ class ZipCodeViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = ZipCode.objects.all()
     serializer_class = ZipCodeSerializer
     filterset_class = ZipCodeSearchFilter
+
+
+class GroupPdfGeneratorViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticated]
+    queryset = ParticipantGroup.objects.all().order_by('-updated_at')
+
+    def get_bund_name(self, scout_organisation):
+        print(scout_organisation)
+        if scout_organisation.level_id > 3:
+            return self.get_bund_name(scout_organisation.parent)
+        elif scout_organisation.level_id < 3:
+            raise Exception("To low value")
+        else:
+            return scout_organisation.name
+
+    def retrieve(self, request, pk):
+
+        groups = Registration.objects.filter(event_id=pk).values(
+                                                         "scout_organisation__name",
+                                                         "custom_choice",
+                                                         "scout_organisation__zip_code__city",
+                                                         "scout_organisation__zip_code__zip_code").annotate(
+                    bund=Case(When(scout_organisation__parent__parent__parent__level=3,
+                           then=F('scout_organisation__parent__parent__parent__name')),
+                      When(scout_organisation__parent__parent__level=3,
+                           then=F('scout_organisation__parent__parent__name')),
+                      When(scout_organisation__parent__level=3,
+                           then=F('scout_organisation__parent__name')),
+                      When(scout_organisation__level=3,
+                           then=F('scout_organisation__name'))),
+                    participants=Coalesce(Sum('participantgroup__number_of_persons'), 0)
+                                 + Coalesce(Count('participantpersonal'), 0),
+        )
+
+        groups = list(groups.iterator())
+        if len(groups) % 2 == 1:
+            groups.append(None)
+        groups = list(zip(groups[:len(groups)//2], groups[len(groups)//2:]))
+
+        pdf, result = generate_groups_pdf(groups)
+
+        if not pdf.err:
+            response = HttpResponse(result.getvalue(), content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename=groups.pdf'
+            return response
+        else:
+            return HttpResponse('Errors')
+
 
 
 class ParticipantGroupViewSet(viewsets.ModelViewSet):
