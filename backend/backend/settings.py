@@ -63,7 +63,8 @@ INSTALLED_APPS = [
     'storages',
     'ebhealthcheck.apps.EBHealthCheckConfig',
     'django_extensions',
-    'django_filters'
+    'django_filters',
+    'django_plotly_dash.apps.DjangoPlotlyDashConfig',
 ]
 
 MIDDLEWARE = [
@@ -190,6 +191,7 @@ CORS_ORIGIN_WHITELIST = [
 CORS_ORIGIN_REGEX_WHITELIST = [
     'http://localhost:8080',
 ]
+X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 CORS_ORIGIN_ALLOW_ALL = True
 
