@@ -91,7 +91,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Registration
-        fields = '__all__'
+        exclude = ('registered_in_phase',)
 
 
 class ZipCodeSerializer(serializers.ModelSerializer):

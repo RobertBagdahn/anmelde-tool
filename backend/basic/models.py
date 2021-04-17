@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from rest_framework.renderers import JSONRenderer
+from django.utils import timezone
 
 
 class TimeStampMixin(models.Model):
@@ -168,6 +169,7 @@ class Event(TimeStampMixin):
     registration_deadline = models.DateTimeField(auto_now=False, auto_now_add=False, null=True, blank=True)
     registration_start = models.DateTimeField(auto_now=False, auto_now_add=False, null=True, blank=True)
     participation_fee = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
+    registration_update_deadline = models.DateTimeField(auto_now=False, auto_now_add=False, null=True, blank=True)
     min_helper = models.IntegerField(blank=True, null=True)
     min_participation = models.IntegerField(blank=True, null=True)
     max_participation = models.IntegerField(blank=True, null=True)
@@ -176,14 +178,23 @@ class Event(TimeStampMixin):
     is_public = models.BooleanField(default=0)
     email_id = models.IntegerField(blank=True, default=0)
 
-    # ToDo: add pdf attatchment
-    # ToDo: add html description
-
     def __str__(self):
         return self.name
 
     def __repr__(self):
         return self.__str__()
+
+
+class RegistrationRegisterPhase(TimeStampMixin):
+    id = models.AutoField(
+        auto_created=True,
+        primary_key=True,
+        serialize=False,
+        verbose_name='ID')
+    name = models.CharField(max_length=50, default="1. Registrierungsphase")
+    registration_end = models.DateTimeField(auto_now=False, auto_now_add=False, null=True, blank=True)
+    registration_start = models.DateTimeField(auto_now=False, auto_now_add=False, null=True, blank=True)
+    event = models.ForeignKey(Event, on_delete=models.PROTECT, null=True)
 
 
 class EventRole(TimeStampMixin):
@@ -192,7 +203,8 @@ class EventRole(TimeStampMixin):
         primary_key=True,
         serialize=False,
         verbose_name='ID')
-    name = models.CharField(max_length=20)
+    name = models.CharField(max_length=20, blank=False, null=False, default="1. Registrierungsphase")
+    registration_phase = models.IntegerField(default=0, blank=False, null=False)
     description = models.CharField(max_length=100, blank=True)
 
     def __str__(self):
@@ -228,12 +240,22 @@ class Registration(TimeStampMixin):
     custom_choice = models.IntegerField(default=0)
     is_confirmed = models.BooleanField(default=0)
     is_accepted = models.BooleanField(default=0)
+    registered_in_phase = models.ForeignKey(RegistrationRegisterPhase, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return "{} - {}".format(self.scout_organisation, self.event)
 
     def __repr__(self):
         return self.__str__()
+
+    def save(self, *args, **kwargs):
+        print(args)
+        today = timezone.now()
+        registration_phase = self.event.registrationregisterphase_set.filter(registration_start__gt=today,
+                                                                             registration_end__lt=today)
+        if len(registration_phase):
+            self.registered_in_phase = registration_phase[0]
+        super(Registration, self).save(*args, **kwargs)
 
 
 class ParticipantGroup(TimeStampMixin):

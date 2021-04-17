@@ -1,71 +1,75 @@
 [
-    {
-        "model": "basic.event",
-        "pk": 1,
-        "fields": {
-            "id": 1,
-            "name": "Bundesfahrt 2021",
-            "description": "DPBM Bundesfahrt nach Norddeutschland",
-            "start_time": "2021-08-01 11:00:00.796728",
-            "end_time": "2021-08-05 11:00:00.796728",
-            "registration_deadline": "2021-03-01 0:00:00.796728",
-            "registration_start": "2021-01-01 00:00:00.796728",
-            "participation_fee": 70.00,
-            "min_helper": 30,
-            "min_participation": 100,
-            "max_participation": 5000,
-            "invitation_code": "AAAAAA",
-            "is_public": true
-        }
-    },
-    {
-        "model": "basic.event",
-        "pk": 2,
-        "fields": {
-            "id": 2,
-            "name": "Test-Fahrt 2020",
-            "description": "Ganz tolle Fahrt",
-            "start_time": "2020-07-26 11:00:00.796728",
-            "end_time": "2020-08-01 11:00:00.796728",
-            "registration_deadline": "2020-03-01 0:00:00.796728",
-            "registration_start": "2019-02-01 00:00:00.796728",
-            "invitation_code": "AAAAAA",
-            "participation_fee": 40.00
-        }
-    },
-    {
-        "model": "basic.event",
-        "pk": 3,
-        "fields": {
-            "id": 3,
-            "name": "Test-Fahrt 2021",
-            "description": "Ganz tolle Fahrt",
-            "start_time": "2021-07-26 11:00:00.796728",
-            "end_time": "2021-08-01 11:00:00.796728",
-            "registration_deadline": "2021-03-01 0:00:00.796728",
-            "registration_start": "2021-02-01 00:00:00.796728",
-            "invitation_code": "AAAAAA",
-            "participation_fee": 40.00
-        }
-    },
-    {
-        "model": "basic.event",
-        "pk": 4,
-        "fields": {
-            "id": 4,
-            "name": "BdP-DPV: stadt&spiel",
-            "description": "Gemeinsames Stadtgeländespiel von DPV und BdP",
-            "start_time": "2021-09-17 18:00:00.000000",
-            "end_time": "2021-09-19 13:00:00.000000",
-            "registration_deadline": "2021-05-01 00:00:00.000000",
-            "registration_start": "2021-01-01 00:00:00.000000",
-            "participation_fee": 10.00,
-            "min_helper": 30,
-            "min_participation": 100,
-            "max_participation": 5000,
-            "invitation_code": "AAAAAA",
-            "max_scout_orga_level": 1,
-            "is_public": true
-        }
+  {
+    "model": "basic.event",
+    "pk": 1,
+    "fields": {
+      "id": 1,
+      "name": "Bundesfahrt 2021",
+      "description": "DPBM Bundesfahrt nach Norddeutschland",
+      "start_time": "2021-08-01 11:00:00.796728",
+      "end_time": "2021-08-05 11:00:00.796728",
+      "registration_deadline": "2021-03-01 0:00:00.796728",
+      "registration_start": "2021-01-01 00:00:00.796728",
+      "participation_fee": 70.00,
+      "min_helper": 30,
+      "min_participation": 100,
+      "max_participation": 5000,
+      "invitation_code": "AAAAAA",
+      "is_public": true,
+      "registration_update_deadline": "2021-06-30 00:00:00.000000"
     }
+  },
+  {
+    "model": "basic.event",
+    "pk": 2,
+    "fields": {
+      "id": 2,
+      "name": "Test-Fahrt 2020",
+      "description": "Ganz tolle Fahrt",
+      "start_time": "2020-07-26 11:00:00.796728",
+      "end_time": "2020-08-01 11:00:00.796728",
+      "registration_deadline": "2020-03-01 0:00:00.796728",
+      "registration_start": "2019-02-01 00:00:00.796728",
+      "invitation_code": "AAAAAA",
+      "participation_fee": 40.00,
+      "registration_update_deadline": "2021-06-30 00:00:00.000000"
+    }
+  },
+  {
+    "model": "basic.event",
+    "pk": 3,
+    "fields": {
+      "id": 3,
+      "name": "Test-Fahrt 2021",
+      "description": "Ganz tolle Fahrt",
+      "start_time": "2021-07-26 11:00:00.796728",
+      "end_time": "2021-08-01 11:00:00.796728",
+      "registration_deadline": "2021-03-01 0:00:00.796728",
+      "registration_start": "2021-02-01 00:00:00.796728",
+      "invitation_code": "AAAAAA",
+      "participation_fee": 40.00,
+      "registration_update_deadline": "2021-06-30 00:00:00.000000"
+    }
+  },
+  {
+    "model": "basic.event",
+    "pk": 4,
+    "fields": {
+      "id": 4,
+      "name": "BdP-DPV: stadt&spiel",
+      "description": "Gemeinsames Stadtgeländespiel von DPV und BdP",
+      "start_time": "2021-09-17 18:00:00.000000",
+      "end_time": "2021-09-19 13:00:00.000000",
+      "registration_deadline": "2021-06-30 00:00:00.000000",
+      "registration_start": "2021-01-01 00:00:00.000000",
+      "participation_fee": 10.00,
+      "min_helper": 30,
+      "min_participation": 100,
+      "max_participation": 5000,
+      "invitation_code": "AAAAAA",
+      "max_scout_orga_level": 1,
+      "is_public": true,
+      "registration_update_deadline": "2021-06-30 00:00:00.000000"
+    }
+  }
 ]
