@@ -6,6 +6,7 @@ import VueGoogleCharts from 'vue-google-charts';
 import VueLodash from 'vue-lodash';
 import lodash from 'lodash';
 import AsyncComputed from 'vue-async-computed';
+import moment from 'moment';
 
 import App from './App.vue';
 import router from './router';
@@ -15,6 +16,8 @@ import auth from './auth';
 
 import 'material-design-icons-iconfont/dist/material-design-icons.css';
 
+const VueMoment = require('vue-moment');
+
 Vue.config.productionTip = false;
 
 Vue.use(Vuelidate);
@@ -22,10 +25,13 @@ Vue.use(VueJwtDecode);
 Vue.use(VuetifyMoney);
 Vue.use(VueGoogleCharts);
 Vue.use(AsyncComputed);
+Vue.use(VueMoment);
 
 Vue.use(VueLodash, { lodash });
 
 auth.interceptorsSetup(store, router);
+
+Vue.prototype.moment = moment;
 
 new Vue({
   router,

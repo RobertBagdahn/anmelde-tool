@@ -31,7 +31,7 @@ from .serializers import EventSerializer, AgeGroupSerializer, EventLocationSeria
     RegistrationSummarySerializer, TravelTagSerializer, PostalAddressSerializer, RegistrationStatSerializer
 
 from .permissions import IsEventMaster, IsKitchenMaster, IsEventCashMaster, IsProgramMaster, \
-    IsLogisticMaster, IsSocialMediaPermission, IsResponsiblePersonPermission
+    IsLogisticMaster, IsSocialMediaPermission, IsResponsiblePersonPermission, IsTeamMemberPermission
 
 from helper.registration_summary import registration_responsible_person, create_registration_summary, \
     create_reminder_registration
@@ -49,6 +49,14 @@ def get_event(kwargs):
     event_id = kwargs.get("event_pk", None)
     if event_id is not None:
         return Event.objects.filter(id=event_id)
+    else:
+        return Response('No event selected', status=status.HTTP_400_BAD_REQUEST)
+
+
+def get_registrations_from_event(kwargs):
+    event_id = kwargs.get("event_pk", None)
+    if event_id is not None:
+        return Registration.objects.filter(event=event_id)
     else:
         return Response('No event selected', status=status.HTTP_400_BAD_REQUEST)
 
@@ -94,7 +102,8 @@ class ScoutHierachyGroupViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class RegistrationViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes_by_action = {'create': [IsAuthenticated],
+                                    'default': [IsAuthenticated, IsResponsiblePersonPermission]}
     queryset = Registration.objects.all()
     serializer_class = RegistrationSerializer
     filter_backends = (DjangoFilterBackend,)
@@ -171,6 +180,14 @@ class RegistrationViewSet(viewsets.ModelViewSet):
                                  }
                     data.update(user_data)
                 registration_responsible_person(data)
+
+    def get_permissions(self):
+        try:
+            # return permission_classes depending on `action`
+            return [permission() for permission in self.permission_classes_by_action[self.action]]
+        except KeyError:
+            # action is not set return default permission_classes
+            return [permission() for permission in self.permission_classes_by_action['default']]
 
 
 class ZipCodeSearchFilter(FilterSet):
@@ -388,15 +405,11 @@ class RegistrationSummaryViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class RegistrationStatViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated, IsEventMaster]
+    permission_classes = [IsAuthenticated, IsTeamMemberPermission]
     serializer_class = RegistrationStatSerializer
 
     def get_queryset(self):
-        event_id = self.kwargs.get("event_pk", None)
-        if (event_id):
-            return Registration.objects.filter(event_id=event_id)
-        else:
-            return Response('No event selected', status=status.HTTP_400_BAD_REQUEST)
+        return get_registrations_from_event(self.kwargs)
 
 
 class TravelPreferenceXlsxViewSet(viewsets.ViewSet):
@@ -411,7 +424,8 @@ class TravelPreferenceXlsxViewSet(viewsets.ViewSet):
 
         groups = Registration.objects.filter(event_id=event_pk).values(
             "scout_organisation__name",
-            "custom_choice").annotate(
+            "custom_choice",
+            "eventlocation").annotate(
             bund=Case(When(scout_organisation__parent__parent__parent__level=3,
                            then=F('scout_organisation__parent__parent__parent__name')),
                       When(scout_organisation__parent__parent__level=3,
@@ -430,8 +444,10 @@ class TravelPreferenceXlsxViewSet(viewsets.ViewSet):
         worksheet.write(1, 0, "Stamm")
         worksheet.write(1, 1, "Bund")
         worksheet.write(1, 2, "Präferenz")
+        worksheet.write(1, 3, "Hat Heim")
         for row_num, group in enumerate(groups.iterator()):
             worksheet.write(row_num + 2, 0, group['scout_organisation__name'])
+            worksheet.write(row_num + 2, 1, group['bund'])
             custom_choice = group['custom_choice']
             if custom_choice == 5 or custom_choice == 8 or custom_choice == 11:
                 worksheet.write(row_num + 2, 2, "weit weg")
@@ -439,7 +455,10 @@ class TravelPreferenceXlsxViewSet(viewsets.ViewSet):
                 worksheet.write(row_num + 2, 2, "in der Nähe")
             else:
                 worksheet.write(row_num + 2, 2, "egal")
-            worksheet.write(row_num + 2, 1, group['bund'])
+
+            print('eventlocation: ', group['eventlocation'])
+            if group['eventlocation']:
+                worksheet.write(row_num + 2, 3, 'x')
 
         workbook.close()
         output.seek(0)
@@ -464,6 +483,7 @@ class TextAndPackageAddressXlsxViewSet(viewsets.ViewSet):
         workbook = xlsxwriter.Workbook(output, {'in_memory': True})
         worksheet = workbook.add_worksheet()
 
+        registration = Registration.objects.filter(event_id=event_pk)
         groups = Registration.objects.filter(event_id=event_pk).values(
             "scout_organisation__name",
             "postaladdress__street",
@@ -538,8 +558,17 @@ class EventLocationFeeXlsxViewSet(viewsets.ViewSet):
         locations = EventLocation.objects.filter(registration__event_id=event_pk).values(
             "name",
             "address",
+            "zip_code__zip_code",
+            "zip_code__city",
+            "contact_name",
+            "contact_email",
+            "contact_email",
             "fix_fee",
-            "per_person_fee")
+            "per_person_fee",
+            "capacity_corona",
+            "capacity",
+            "location_type__name",
+            "registration__scout_organisation")
 
         worksheet.set_column(0, 1, 25)
         worksheet.set_column(2, 3, 10)
@@ -549,13 +578,26 @@ class EventLocationFeeXlsxViewSet(viewsets.ViewSet):
 
         worksheet.write(1, 0, "Name")
         worksheet.write(1, 1, "Adresse")
-        worksheet.write(1, 2, "Fixkosten")
-        worksheet.write(1, 3, "Kosten p.P.")
+        worksheet.write(1, 2, "Postleitzahl")
+        worksheet.write(1, 3, "Stadt")
+        worksheet.write(1, 4, "Stamm")
+        worksheet.write(1, 5, "Typ")
+        worksheet.write(1, 6, "Fixkosten")
+        worksheet.write(1, 7, "Kosten p.P.")
+        worksheet.write(1, 8, "Schlafplatz")
+        worksheet.write(1, 9, "Schlafplatz unter Corona Bedinungen")
+
         for row_num, location in enumerate(locations.iterator()):
             worksheet.write(row_num + 2, 0, location['name'])
             worksheet.write(row_num + 2, 1, location['address'])
-            worksheet.write(row_num + 2, 2, location['fix_fee'])
-            worksheet.write(row_num + 2, 3, location['per_person_fee'])
+            worksheet.write(row_num + 2, 2, location['zip_code__zip_code'])
+            worksheet.write(row_num + 2, 3, location['zip_code__city'])
+            worksheet.write(row_num + 2, 4, location['registration__scout_organisation'])
+            worksheet.write(row_num + 2, 5, location['location_type__name'])
+            worksheet.write(row_num + 2, 6, location['fix_fee'])
+            worksheet.write(row_num + 2, 7, location['per_person_fee'])
+            worksheet.write(row_num + 2, 8, location['capacity'])
+            worksheet.write(row_num + 2, 9, location['capacity_corona'])
 
         workbook.close()
         output.seek(0)
@@ -574,7 +616,7 @@ class ReminderMailViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated, IsEventMaster]
 
     def create(self, request, *args, **kwargs):
-        queryset = get_dataset(self.kwargs, 'event_pk', Registration)
+        queryset = get_registrations_from_event(kwargs)
 
         if 'code' in request.query_params:
             code = request.query_params.get('code', None)

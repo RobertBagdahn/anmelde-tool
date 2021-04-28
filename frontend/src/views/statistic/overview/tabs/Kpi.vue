@@ -32,8 +32,8 @@
 
 <script>
 import { serviceMixin } from '@/mixins/serviceMixin';
-import kpiCard from './components/kpiCard.vue';
-import kpiCardList from './components/kpiCardList.vue';
+import kpiCard from '@/components/kpi/Card.vue';
+import kpiCardList from '@/components/kpi/CardList.vue';
 
 export default {
   mixins: [serviceMixin],

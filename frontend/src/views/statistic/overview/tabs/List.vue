@@ -36,8 +36,6 @@
         :headers="headers"
         :items="getItems"
         :items-per-page="itemsPerPage"
-        :expanded.sync="expanded"
-        show-expand
         hide-default-footer
         :item-class="rowClasses"
       >
@@ -48,19 +46,18 @@
             }}</v-icon
           >
         </template>
+        <template v-slot:item.createdAt="{ item }">
+          {{
+            moment(item.createdAt).format('DD.MM.YYYY')
+          }}
+        </template>
         <template v-slot:item.numberParticipant="{ item }">
           <td v-html="getNumberParticipant(item)" disabled></td>
-        </template>
-        <template v-slot:expanded-item="{ item }">
-          <td :colspan="headers.length">
-            <pre>{{ getBody(item) }}</pre>
-          </td>
         </template>
         <template slot="body.append">
           <tr>
             <th>Summe</th>
-            <th></th>
-            <th></th>
+            <th colspan="3">{{ getTotalStamm }}</th>
             <th>{{ getTotalParticipant }}</th>
           </tr>
         </template>
@@ -68,8 +65,10 @@
     </v-row>
   </v-container>
 </template>
+
 <script>
 import { serviceMixin } from '@/mixins/serviceMixin';
+import moment from 'moment'; // eslint-disable-line
 
 export default {
   mixins: [serviceMixin],
@@ -83,6 +82,7 @@ export default {
     },
     headers: [
       { text: 'Bestätigt', value: 'isConfirmed' },
+      { text: 'Datum', value: 'createdAt' },
       { text: 'Bund', value: 'bundName' },
       { text: 'Name', value: 'scoutOrganisation' },
       { text: 'Teilnehmer (Helfer)', value: 'numberParticipant' },
@@ -138,6 +138,12 @@ export default {
       );
 
       return `${numberParticipant || 0} (${numberHelper || 0})`;
+    },
+    getTotalStamm() {
+      const numberStammDpv = this.getItems.filter((item) => item.verbandName === 'DPV').length;
+      const numberStammBdp = this.getItems.filter((item) => item.verbandName === 'BdP').length;
+
+      return `Stämme DPV: ${numberStammDpv || 0} - Stämme BdP:${numberStammBdp || 0}`;
     },
   },
 

@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import pdfContentPage from '@/views/statistic/downlaods/PdfContentPage.vue';
+import pdfContentPage from '@/views/statistic/downlaods/tabs/pdf/ContentPage.vue';
 import html2pdf from 'html2pdf.js';
 
 export default {

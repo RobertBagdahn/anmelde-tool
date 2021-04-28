@@ -1,48 +1,37 @@
 <template>
   <v-container>
-    <v-header>
-      Excel Downloads
-    </v-header>
     <v-row>
-    <v-btn
-      class="ma-2"
-      @click="clickDownload('event_locations_fee')"
-      color="primary"
+      <v-btn
+        class="ma-2"
+        @click="clickDownload('event_locations_fee')"
+        color="primary"
       >
-      <v-icon left>
-        mdi-microsoft-excel
-      </v-icon>
-      Zeltplatgebühren
-    </v-btn>
+        <v-icon left> mdi-microsoft-excel </v-icon>
+        Zeltplatgebühren
+      </v-btn>
     </v-row>
-        <v-row>
-    <v-btn
-      class="ma-2"
-      color="primary"
-      @click="clickDownload('travel-preference')"
-      download
+    <v-row>
+      <v-btn
+        class="ma-2"
+        color="primary"
+        @click="clickDownload('travel-preference')"
+        download
       >
-      <v-icon left>
-        mdi-microsoft-excel
-      </v-icon>
-      Reise Preferenz
-    </v-btn
-    >
+        <v-icon left> mdi-microsoft-excel </v-icon>
+        Reise Preferenz
+      </v-btn>
     </v-row>
-        <v-row>
-    <v-btn
-      class="ma-2"
-      @click="clickDownload('text-package-address')"
-      download
-      color="primary"
+    <v-row>
+      <v-btn
+        class="ma-2"
+        @click="clickDownload('text-package-address')"
+        download
+        color="primary"
       >
-      <v-icon left>
-        mdi-microsoft-excel
-      </v-icon>
-      Packet Adressen
-  </v-btn
-    >
-        </v-row>
+        <v-icon left> mdi-microsoft-excel </v-icon>
+        Packet Adressen
+      </v-btn>
+    </v-row>
   </v-container>
 </template>
 
