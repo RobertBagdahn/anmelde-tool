@@ -116,6 +116,12 @@ class RegistrationViewSet(viewsets.ModelViewSet):
         queryset_event = Event.objects.all()
         event = get_object_or_404(queryset_event, pk=request.data['event'])
 
+        if request.user.userextended.scout_organisation.id != request.data['scout_organisation']:
+            return Response({'forbidden': 'scout organisation from user and request does not match'},
+                            status=status.HTTP_403_FORBIDDEN)
+        if event.registration_set.filter(scout_organisation=request.user.userextended.scout_organisation.id).exists():
+            return Response({'forbidden': 'already registered'}, status=status.HTTP_403_FORBIDDEN)
+
         if 'code' in self.request.query_params:
             code = self.request.query_params.get('code', None)
         else:

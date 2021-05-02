@@ -91,11 +91,11 @@ export default {
   }
 
   .v-card h5  span.will_bleiben {
-    border-bottom: 2px solid;
+    font-weight: bold;
   }
 
   .v-card h5 span.heim_aber_egal {
-    border-bottom: 3px dotted;
+    border-bottom: 2px solid;
   }
 }
 </style>

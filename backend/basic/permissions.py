@@ -61,7 +61,7 @@ class IsResponsiblePersonPermission(permissions.BasePermission):
 
     def has_permission(self, request, view):
         pk = view.kwargs.get("registration_pk") or view.kwargs.get("pk") or view.kwargs.get("pk") or \
-             ('registration' in request.data and request.data['registration'])
+             ('registration' in request.data and request.data['registration']) or request.query_params['id']
         if pk is None:
             raise NoRegistationId()
         return Registration.objects.filter(id=pk, responsible_persons=request.user).exists()

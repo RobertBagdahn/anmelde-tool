@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 from django.db.models import Sum, Count, F, Q, Case, When, Value, CharField
 from django.db.models.functions import Coalesce
 from itertools import combinations
+from django.utils import timezone
 
 
 def distinct_combinations(num_range):
@@ -28,6 +29,8 @@ class EventSerializer(serializers.ModelSerializer):
 class EventOverviewSerializer(serializers.ModelSerializer):
     participant_role = serializers.SerializerMethodField('get_event_role')
     is_registered = serializers.SerializerMethodField('get_is_registered')
+    can_register = serializers.SerializerMethodField('get_can_register')
+    can_edit = serializers.SerializerMethodField('get_can_edit')
 
     class Meta:
         model = Event
@@ -41,7 +44,9 @@ class EventOverviewSerializer(serializers.ModelSerializer):
             'registration_deadline',
             'end_time',
             'participant_role',
-            'is_registered'
+            'is_registered',
+            'can_register',
+            'can_edit'
         )
 
     def get_event_role(self, obj):
@@ -61,6 +66,17 @@ class EventOverviewSerializer(serializers.ModelSerializer):
             'is_confirmed',
             'is_accepted'
         )
+
+    def get_can_register(self, obj):
+        return obj.registration_deadline >= timezone.now()
+
+    def get_can_edit(self, obj):
+        registration = obj.registration_set.filter(
+            scout_organisation=self.context['request'].user.userextended.scout_organisation)
+        if len(registration) > 0:
+            return registration.filter(responsible_persons__in=[self.context['request'].user.id]).exists()
+        else:
+            return False
 
 
 class AgeGroupSerializer(serializers.ModelSerializer):
